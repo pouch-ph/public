@@ -1,0 +1,288 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Pouch PH
+servers:
+- url: /v1
+paths:
+  /invoices:
+    post:
+      summary: Create an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoice'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateInvoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+        - Invoices
+  /webhooks:
+    post:
+      summary: Create a webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhook'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+      - Webhooks    
+    get:
+      summary: List webhooks
+      responses:
+        '200':
+          $ref: '#/components/responses/ListWebhook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+        - Webhooks      
+  /webhooks/{webhookId}:
+    get:
+      summary: Get a single webhook
+      parameters:
+        - in: path
+          name: webhookId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/GetWebhook'
+        '404':
+          $ref: '#/components/responses/NotFound'          
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+      - Webhooks
+    put:
+      summary: Update a webhook
+      parameters:
+        - in: path
+          name: webhookId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdateWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+        - Webhooks
+    delete:
+      summary: Delete a webhook
+      parameters:
+        - in: path
+          name: webhookId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'Deleted'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+        - Webhooks
+components:
+  schemas:
+    CreateInvoice:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+      properties:
+        amount:
+          type: string
+        memo:
+          type: string
+        currency:
+          type: string
+    Invoice:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        memo:
+          type: string
+        bolt11:
+          type: string
+        recipient:
+          $ref: '#/components/schemas/Recipient'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    Recipient:
+      type: object
+      additionalProperties: false
+      properties:
+        currency:
+          type: string
+        subtotal:
+          type: string
+        modifierAmount:
+          type: string
+        modifierType:
+          type: string
+        entityType:
+          type: string
+        entityIdentifier:
+          type: string
+        total:
+          type: string
+    CreateWebhook:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - event
+      properties:
+        url:
+          type: string
+        event:
+          type: string
+        metadata:
+          type: object
+    Webhook:
+      type: object
+      additionalProperties: false
+      properties:
+        webhookId:
+          type: string
+        url:
+          type: string
+        token:
+          type: string
+        event:
+          type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+        updatedAt:
+          type: string         
+    UpdateWebhook:
+      type: object
+      additionalProperties: false
+      properties:
+        url:
+          type: string
+        metadata:
+          type: object
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: An application-specific error code expressed as a string value.
+        message:
+          type: string
+          description: Desc
+        details:
+          type: array
+          items:
+            type: string
+          description:
+            An array containing non-standard meta-information about the
+            error.
+  responses:
+    CreateInvoice:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Invoice'
+    CreateWebhook:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Webhook'
+    GetWebhook:
+      description: Retrieved
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Webhook'
+    ListWebhook:
+      description: Retreived
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Webhook'
+    UpdateWebhook:
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Webhook'    
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Unexpected error occurred
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
