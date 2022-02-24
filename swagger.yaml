@@ -25,6 +25,27 @@ paths:
           $ref: '#/components/responses/ServerError'
       tags:
         - Invoices
+    put:
+      summary: Pay an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayInvoice'
+      responses:
+        '200':
+          $ref: '#/components/responses/PayInvoice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/Unprocessable'          
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      tags:
+        - Invoices        
   /webhooks:
     post:
       summary: Create a webhook
@@ -156,6 +177,65 @@ components:
           type: string
         updatedAt:
           type: string
+    PayInvoice:
+      type: object
+      additionalProperties: false
+      required:
+        - bolt11
+      properties:
+        bolt11:
+          type: string
+    Transaction:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        sender:
+          $ref: '#/components/schemas/Sender'
+        senderDebitedAmount:
+          type: string
+        recipient:
+          $ref: '#/components/schemas/Recipient'          
+        status:
+          type: string
+        memo:
+          type: string
+        bolt11:
+          type: string
+        updates:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              newStatus:
+                type: string
+              description:
+                type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string          
+    Sender:
+      type: object
+      additionalProperties: false
+      properties:
+        currency:
+          type: string
+        subtotal:
+          type: string
+        modifierAmount:
+          type: string
+        modifierType:
+          type: string
+        entityType:
+          type: string
+        entityIdentifier:
+          type: string
+        total:
+          type: string    
     Recipient:
       type: object
       additionalProperties: false
@@ -236,6 +316,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Invoice'
+    PayInvoice:
+      description: Paid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Transaction'            
     CreateWebhook:
       description: Created
       content:
@@ -274,6 +360,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    Unprocessable:
+      description: The specified resource is in invalid state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'            
     NotFound:
       description: The specified resource was not found
       content:
