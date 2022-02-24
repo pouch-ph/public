@@ -171,6 +171,8 @@ components:
           type: string
         bolt11:
           type: string
+        dataUri:
+          type: string
         recipient:
           $ref: '#/components/schemas/Recipient'
         createdAt:
